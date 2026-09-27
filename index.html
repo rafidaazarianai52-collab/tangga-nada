@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petualangan Tangga Nada - Piano Asli</title>
+<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#dff6ff,#fff4cf);color:#18324a}
+.wrap{max-width:980px;margin:auto;padding:20px}
+.hero{background:linear-gradient(135deg,#247bd6,#43b96e);color:#fff;text-align:center;border-radius:28px;padding:24px;box-shadow:0 9px 22px #0002}
+h1{margin:0;font-size:35px}.hero p{margin:8px 0;font-size:18px}
+.card{background:#fff;border-radius:24px;padding:20px;margin-top:18px;box-shadow:0 7px 20px #0001}
+.center{text-align:center}
+.start{border:0;border-radius:18px;padding:16px 28px;background:#247bd6;color:white;font-size:20px;font-weight:bold;cursor:pointer}
+.start:disabled{opacity:.55}
+.status{min-height:28px;font-weight:bold;margin:12px}
+.piano{display:flex;justify-content:center;gap:6px;align-items:flex-end;height:285px;margin:18px 0}
+.key{border:0;border-radius:15px 15px 8px 8px;color:#fff;font-weight:bold;font-size:20px;cursor:pointer;width:90px;box-shadow:0 5px 0 #0002;transition:.12s}
+.key:active,.key.playing{transform:translateY(5px);box-shadow:0 1px 0 #0002}
+.k1{height:105px;background:#ef6565}.k2{height:125px;background:#f1a343}
+.k3{height:145px;background:#dec83f;color:#403800}.k4{height:165px;background:#55be6c}
+.k5{height:185px;background:#32adc9}.k6{height:205px;background:#627fe0}
+.k7{height:225px;background:#9667d5}.k8{height:245px;background:#d45da9}
+.note{display:block;font-size:13px;margin-top:5px}
+.listen{border:0;border-radius:16px;padding:14px 22px;background:#173b69;color:#fff;font-size:18px;font-weight:bold;cursor:pointer}
+@media(max-width:700px){h1{font-size:28px}.piano{gap:3px;height:240px}.key{width:43px;font-size:14px}.note{font-size:10px}}
+</style>
+
+<style>
+.game-card{margin-top:18px}
+.mission-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+.mission{border:0;border-radius:14px;padding:12px 15px;background:#edf4ff;color:#18324a;font-weight:bold;cursor:pointer}
+.mission.active{background:#247bd6;color:#fff}
+.mission-box{background:#f8fbff;border-radius:18px;padding:18px;margin-top:12px}
+.game-options{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:15px}
+.game-options button{border:0;border-radius:14px;padding:14px;background:#fff;border:2px solid #dbe7f5;font-weight:bold;font-size:17px;cursor:pointer}
+.game-options button:hover{transform:translateY(-2px)}
+.game-options button.good{background:#b9efc3;border-color:#57bd6e}
+.game-options button.bad{background:#ffc3c3;border-color:#df6666}
+.game-msg{text-align:center;min-height:30px;margin-top:14px;font-weight:bold;font-size:18px}
+.pattern{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin:18px 0}
+.pattern span{background:#247bd6;color:#fff;border-radius:12px;padding:12px 17px;font-size:20px;font-weight:bold}
+.game-score{margin-top:18px;font-size:20px}
+@media(max-width:650px){.game-options{grid-template-columns:repeat(2,1fr)}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<section class="hero">
+<h1>🎹 Petualangan Tangga Nada</h1>
+<p>Dengarkan dan tekan nada sesuai keinginanmu!</p>
+</section>
+
+<section class="card center">
+<h2>🎵 Piano Tangga Nada</h2>
+<p>Gunakan <b>suara piano asli</b> dari sampel <b>Salamander Grand Piano</b>.</p>
+<button id="start" class="start" onclick="startPiano()">▶ MULAI PIANO</button>
+<div id="status" class="status">Klik MULAI PIANO terlebih dahulu.</div>
+</section>
+
+<section class="card">
+<h2 class="center">DO – RE – MI – FA – SOL – LA – SI – DO</h2>
+<div class="piano">
+<button class="key k1" data-note="C4" onclick="play('C4',this)">DO<span class="note">C4</span></button>
+<button class="key k2" data-note="D4" onclick="play('D4',this)">RE<span class="note">D4</span></button>
+<button class="key k3" data-note="E4" onclick="play('E4',this)">MI<span class="note">E4</span></button>
+<button class="key k4" data-note="F4" onclick="play('F4',this)">FA<span class="note">F4</span></button>
+<button class="key k5" data-note="G4" onclick="play('G4',this)">SOL<span class="note">G4</span></button>
+<button class="key k6" data-note="A4" onclick="play('A4',this)">LA<span class="note">A4</span></button>
+<button class="key k7" data-note="B4" onclick="play('B4',this)">SI<span class="note">B4</span></button>
+<button class="key k8" data-note="C5" onclick="play('C5',this)">DO<span class="note">C5</span></button>
+</div>
+<div class="center"><button class="listen" onclick="playScale()">🔊 Dengarkan Tangga Nada</button></div>
+</section>
+
+<section class="card center">
+<h3>🎯 Coba sendiri!</h3>
+<p>Tekan tombol <b>DO, RE, MI, FA, SOL, LA, SI</b> sesuka hati untuk membuat urutan nada sendiri.</p>
+<p>Contoh: <b>DO – MI – SOL – MI – DO</b></p>
+</section>
+</div>
+
+
+<section class="card game-card">
+  <h2 class="center">🎮 Misi Seru Tangga Nada</h2>
+  <p class="center">Selesaikan 3 tantangan untuk mengumpulkan bintang!</p>
+
+  <div class="mission-tabs">
+    <button class="mission active" onclick="showMission(1)">1️⃣ Tangkap Nada</button>
+    <button class="mission" onclick="showMission(2)">2️⃣ Nada Hilang</button>
+    <button class="mission" onclick="showMission(3)">3️⃣ Ikuti Pola</button>
+  </div>
+
+  <div id="mission1" class="mission-box">
+    <h3>👂 Misi 1: Tangkap Nada</h3>
+    <p>Dengarkan bunyi piano, lalu tekan nada yang kamu dengar.</p>
+    <div class="center"><button class="listen" onclick="playCatch()">🔊 Dengarkan</button></div>
+    <div id="catchOptions" class="game-options"></div>
+    <div id="catchMsg" class="game-msg"></div>
+  </div>
+
+  <div id="mission2" class="mission-box" style="display:none">
+    <h3>🧩 Misi 2: Nada Hilang</h3>
+    <p>Lengkapi urutan tangga nada yang hilang.</p>
+    <div id="missingPattern" class="pattern"></div>
+    <div id="missingOptions" class="game-options"></div>
+    <div id="missingMsg" class="game-msg"></div>
+  </div>
+
+  <div id="mission3" class="mission-box" style="display:none">
+    <h3>🎵 Misi 3: Ikuti Pola</h3>
+    <p>Dengarkan pola nada. Setelah selesai, tekan nada dengan urutan yang sama.</p>
+    <div class="center"><button class="listen" onclick="startPattern()">🔊 Dengarkan Pola</button></div>
+    <div id="patternOptions" class="game-options"></div>
+    <div id="patternMsg" class="game-msg"></div>
+  </div>
+
+  <div class="game-score center">⭐ Bintang Game: <b id="gameStars">0</b> / 9</div>
+</section>
+
+<script>
+let sampler=null,ready=false;
+async function startPiano(){
+ const btn=document.getElementById("start");
+ const status=document.getElementById("status");
+ btn.disabled=true;
+ status.textContent="⏳ Memuat suara piano asli...";
+ await Tone.start();
+ sampler=new Tone.Sampler({
+  urls:{
+   "C4":"C4.mp3",
+   "D#4":"Ds4.mp3",
+   "F#4":"Fs4.mp3",
+   "A4":"A4.mp3",
+   "C5":"C5.mp3"
+  },
+  release:1,
+  baseUrl:"https://tonejs.github.io/audio/salamander/"
+ }).toDestination();
+ await Tone.loaded();
+ ready=true;
+ status.textContent="🎹 Piano siap! Sekarang tekan nada sesuka hati.";
+ btn.textContent="✓ PIANO SIAP";
+}
+function play(note,el){
+ if(!ready){
+  document.getElementById("status").textContent="Klik MULAI PIANO terlebih dahulu.";
+  return;
+ }
+ sampler.triggerAttackRelease(note,"1n");
+ el.classList.add("playing");
+ setTimeout(()=>el.classList.remove("playing"),180);
+}
+async function playScale(){
+ if(!ready){document.getElementById("status").textContent="Klik MULAI PIANO terlebih dahulu.";return}
+ const seq=["C4","D4","E4","F4","G4","A4","B4","C5"];
+ const els=[...document.querySelectorAll(".key")];
+ for(let i=0;i<seq.length;i++){
+  sampler.triggerAttackRelease(seq[i],"4n");
+  els[i].classList.add("playing");
+  setTimeout(()=>els[i].classList.remove("playing"),330);
+  await new Promise(r=>setTimeout(r,420));
+ }
+}
+</script>
+
+<script>
+let gameStars=0;
+const simpleNotes=[
+  ["DO","C4"],["RE","D4"],["MI","E4"],["FA","F4"],
+  ["SOL","G4"],["LA","A4"],["SI","B4"]
+];
+
+function addGameStar(){
+  gameStars++;
+  document.getElementById("gameStars").textContent=gameStars;
+}
+function showMission(n){
+  document.querySelectorAll(".mission-box").forEach(x=>x.style.display="none");
+  document.getElementById("mission"+n).style.display="block";
+  document.querySelectorAll(".mission").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".mission")[n-1].classList.add("active");
+  if(n===1) newCatch();
+  if(n===2) newMissing();
+  if(n===3) resetPattern();
+}
+
+/* Misi 1 */
+let catchTarget=0;
+function newCatch(){
+  catchTarget=Math.floor(Math.random()*7);
+  const box=document.getElementById("catchOptions");
+  box.innerHTML="";
+  simpleNotes.forEach((n,i)=>{
+    const b=document.createElement("button");
+    b.textContent=n[0];
+    b.onclick=()=>catchAnswer(i,b);
+    box.appendChild(b);
+  });
+  document.getElementById("catchMsg").textContent="Klik “Dengarkan”, lalu pilih nadanya.";
+}
+function playCatch(){
+  if(!ready){document.getElementById("status").textContent="Klik MULAI PIANO terlebih dahulu.";return}
+  sampler.triggerAttackRelease(simpleNotes[catchTarget][1],"1n");
+  document.getElementById("catchMsg").textContent="👂 Dengarkan baik-baik...";
+}
+function catchAnswer(i,b){
+  document.querySelectorAll("#catchOptions button").forEach(x=>x.disabled=true);
+  if(i===catchTarget){
+    b.classList.add("good"); addGameStar();
+    document.getElementById("catchMsg").textContent="🌟 Benar! Kamu mengenali bunyi pianonya!";
+  }else{
+    b.classList.add("bad");
+    document.getElementById("catchMsg").textContent="💡 Belum tepat. Dengarkan lagi!";
+  }
+  setTimeout(newCatch,1000);
+}
+
+/* Misi 2 */
+let missingTarget=0;
+function newMissing(){
+  missingTarget=Math.floor(Math.random()*6)+1;
+  const labels=["DO","RE","MI","FA","SOL","LA","SI"];
+  const pat=labels.map((x,i)=>i===missingTarget?"?":x);
+  document.getElementById("missingPattern").innerHTML=pat.map(x=>`<span>${x}</span>`).join("");
+  const box=document.getElementById("missingOptions");box.innerHTML="";
+  labels.forEach((x,i)=>{
+    const b=document.createElement("button");b.textContent=x;
+    b.onclick=()=>missingAnswer(i,b);box.appendChild(b);
+  });
+  document.getElementById("missingMsg").textContent="Pilih nada yang hilang.";
+}
+function missingAnswer(i,b){
+  document.querySelectorAll("#missingOptions button").forEach(x=>x.disabled=true);
+  if(i===missingTarget){
+    b.classList.add("good");addGameStar();
+    document.getElementById("missingMsg").textContent="🎉 Tepat! Tangga nadanya lengkap!";
+  }else{
+    b.classList.add("bad");
+    document.getElementById("missingMsg").textContent="💡 Coba ingat urutan DO–RE–MI–FA–SOL–LA–SI.";
+  }
+  setTimeout(newMissing,1000);
+}
+
+/* Misi 3 */
+let pattern=[],patternPos=0,patternListening=false,patternInput=[];
+function resetPattern(){
+  pattern=[];
+  patternPos=0;
+  patternInput=[];
+  document.getElementById("patternMsg").textContent="Klik “Dengarkan Pola” untuk memulai.";
+  buildPatternButtons();
+}
+function buildPatternButtons(){
+  const box=document.getElementById("patternOptions");box.innerHTML="";
+  simpleNotes.forEach((n,i)=>{
+    const b=document.createElement("button");b.textContent=n[0];
+    b.onclick=()=>patternPick(i,b);box.appendChild(b);
+  });
+}
+async function startPattern(){
+  if(!ready){document.getElementById("status").textContent="Klik MULAI PIANO terlebih dahulu.";return}
+  pattern=[...Array(3)].map(()=>Math.floor(Math.random()*7));
+  patternInput=[];patternListening=true;
+  document.getElementById("patternMsg").textContent="👂 Dengarkan 3 nada...";
+  for(const i of pattern){
+    sampler.triggerAttackRelease(simpleNotes[i][1],"4n");
+    await new Promise(r=>setTimeout(r,600));
+  }
+  patternListening=false;
+  document.getElementById("patternMsg").textContent="Sekarang tekan urutannya!";
+}
+function patternPick(i,b){
+  if(patternListening||!pattern.length)return;
+  const pos=patternInput.length;
+  if(i!==pattern[pos]){
+    b.classList.add("bad");
+    document.getElementById("patternMsg").textContent="💡 Urutannya belum tepat. Dengarkan lagi.";
+    setTimeout(()=>{b.classList.remove("bad");resetPattern()},900);
+    return;
+  }
+  b.classList.add("good");
+  patternInput.push(i);
+  sampler.triggerAttackRelease(simpleNotes[i][1],"4n");
+  if(patternInput.length===pattern.length){
+    addGameStar();
+    document.getElementById("patternMsg").textContent="🏆 Hebat! Kamu berhasil mengikuti pola!";
+    setTimeout(resetPattern,1100);
+  }
+}
+newCatch(); newMissing(); resetPattern();
+</script>
+
+</body>
+</html>
